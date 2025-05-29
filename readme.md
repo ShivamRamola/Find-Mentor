@@ -1,10 +1,6 @@
 # Find Mentor Platform 🎓
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
 A modern web-based platform that revolutionizes online mentoring by connecting students with expert mentors through real-time video sessions. Our platform makes learning personal, accessible, and effective.
-
-![Platform Preview](frontend/assets/mentor%20web%20design.png)
 
 ## ✨ Key Features
 
