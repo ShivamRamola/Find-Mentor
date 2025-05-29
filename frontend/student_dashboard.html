@@ -1,0 +1,708 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <title>Student Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    rel="stylesheet"
+  />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+    }
+  </style>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+  <!-- Header -->
+  <header class="bg-white shadow-md sticky top-0 z-30">
+    <div
+      class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16"
+    >
+      <div class="flex items-center space-x-3">
+        <img
+          alt="Student Dashboard logo with letters SD in blue and white background"
+          class="h-10 w-10 rounded-full"
+          height="40"
+          src="assets/logo.jpg"
+          width="40"
+        />
+        <h1 class="text-2xl font-semibold text-blue-700">Student Dashboard</h1>
+      </div>
+      <nav class="hidden md:flex space-x-6 text-gray-700 font-medium">
+        <a class="hover:text-blue-600 transition" href="#">Home</a>
+        <a class="hover:text-blue-600 transition" href="#">Courses</a>
+        <a class="hover:text-blue-600 transition" href="#">Grades</a>
+        <a class="hover:text-blue-600 transition" href="#">Schedule</a>
+        <a class="hover:text-blue-600 transition" href="#">Messages</a>
+      </nav>
+      <div class="hidden md:flex items-center space-x-4">
+        <button
+          aria-label="Notifications"
+          class="relative text-gray-600 hover:text-blue-600 transition focus:outline-none"
+        >
+          <i class="fas fa-bell fa-lg"></i>
+          <span
+            id="notification-count"
+            class="absolute -top-1 -right-2 bg-red-600 text-white text-xs rounded-full px-1.5"
+            >0</span
+          >
+        </button>
+        <button
+          aria-label="User menu"
+          class="flex items-center space-x-2 focus:outline-none"
+        >
+          <div
+            id="user-avatar"
+            class="rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold w-8 h-8 text-lg"
+          >
+            JD
+          </div>
+          <span id="user-name" class="text-gray-700 font-semibold">John Doe</span>
+          <i class="fas fa-chevron-down text-gray-500"></i>
+        </button>
+      </div>
+      <button
+        aria-label="Open menu"
+        class="md:hidden text-gray-700 hover:text-blue-600 focus:outline-none"
+        id="mobile-menu-button"
+      >
+        <i class="fas fa-bars fa-lg"></i>
+      </button>
+    </div>
+    <!-- Mobile menu -->
+    <nav
+      aria-label="Mobile menu"
+      class="md:hidden bg-white border-t border-gray-200 hidden"
+      id="mobile-menu"
+    >
+      <a
+        class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium"
+        href="#"
+        >Home</a
+      >
+      <a
+        class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium"
+        href="#"
+        >Courses</a
+      >
+      <a
+        class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium"
+        href="#"
+        >Grades</a
+      >
+      <a
+        class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium"
+        href="#"
+        >Schedule</a
+      >
+      <a
+        class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium"
+        href="#"
+        >Messages</a
+      >
+    </nav>
+  </header>
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <!-- Sidebar -->
+      <aside
+        class="md:col-span-1 bg-white rounded-lg shadow p-6 sticky top-20 h-fit"
+      >
+        <div class="flex flex-col items-center space-y-4">
+          <div
+            id="profile-picture"
+            class="rounded-full w-24 h-24 object-cover bg-blue-600 text-white flex items-center justify-center font-semibold text-4xl"
+          >
+            JD
+          </div>
+          <h2 id="student-name" class="text-xl font-semibold text-gray-800">
+            John Doe
+          </h2>
+          <p id="student-major" class="text-gray-500">Major: Loading...</p>
+          <p id="student-id" class="text-gray-400 text-sm">Student ID: Loading...</p>
+        </div>
+        <nav class="mt-8 space-y-3">
+          <a
+            class="flex items-center space-x-3 text-gray-700 hover:text-blue-600 font-semibold px-3 py-2 rounded-md transition"
+            href="#"
+          >
+            <i class="fas fa-home fa-fw"></i>
+            <span>Dashboard</span>
+          </a>
+          <a
+            class="flex items-center space-x-3 text-gray-700 hover:text-blue-600 font-semibold px-3 py-2 rounded-md transition"
+            href="#"
+          >
+            <i class="fas fa-book fa-fw"></i>
+            <span>My Courses</span>
+          </a>
+          <a
+            class="flex items-center space-x-3 text-gray-700 hover:text-blue-600 font-semibold px-3 py-2 rounded-md transition"
+            href="#"
+          >
+            <i class="fas fa-graduation-cap fa-fw"></i>
+            <span>Grades</span>
+          </a>
+          <a
+            class="flex items-center space-x-3 text-gray-700 hover:text-blue-600 font-semibold px-3 py-2 rounded-md transition"
+            href="#"
+          >
+            <i class="fas fa-calendar-alt fa-fw"></i>
+            <span>Schedule</span>
+          </a>
+          <a
+            class="flex items-center space-x-3 text-gray-700 hover:text-blue-600 font-semibold px-3 py-2 rounded-md transition"
+            href="#"
+          >
+            <i class="fas fa-envelope fa-fw"></i>
+            <span>Messages</span>
+          </a>
+          <a
+            class="flex items-center space-x-3 text-gray-700 hover:text-blue-600 font-semibold px-3 py-2 rounded-md transition"
+            href="#"
+          >
+            <i class="fas fa-cog fa-fw"></i>
+            <span>Settings</span>
+          </a>
+        </nav>
+      </aside>
+      <!-- Main Content -->
+      <section class="md:col-span-3 space-y-6">
+        <!-- Welcome Card -->
+        <div
+          class="bg-white rounded-lg shadow p-6 flex flex-col md:flex-row md:items-center md:justify-between"
+        >
+          <div>
+            <h2 class="text-2xl font-semibold text-gray-800" id="welcome-message">
+              Welcome back!
+            </h2>
+            <p class="text-gray-600 mt-1">
+              Here's a quick overview of your academic progress and upcoming
+              events.
+            </p>
+          </div>
+          <img
+            alt="Illustration of a student studying at a desk with books and laptop in a cozy room"
+            class="mt-4 md:mt-0 w-28 h-28 object-contain"
+            height="112"
+            src="https://storage.googleapis.com/a1aa/image/c16604fd-c50b-4f77-e6e5-d1b3c42eb733.jpg"
+            width="112"
+          />
+        </div>
+        <!-- Academic Progress -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">Academic Progress</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div class="bg-blue-50 rounded-lg p-4 text-center">
+              <p
+                id="gpa"
+                class="text-3xl font-bold text-blue-700"
+              ></p>
+              <p class="text-gray-600 mt-1">Current GPA</p>
+            </div>
+            <div class="bg-green-50 rounded-lg p-4 text-center">
+              <p
+                id="credits"
+                class="text-3xl font-bold text-green-700"
+              ></p>
+              <p class="text-gray-600 mt-1">Credits Completed</p>
+            </div>
+            <div class="bg-yellow-50 rounded-lg p-4 text-center">
+              <p
+                id="courses-enrolled"
+                class="text-3xl font-bold text-yellow-700"
+              ></p>
+              <p class="text-gray-600 mt-1">Courses Enrolled</p>
+            </div>
+          </div>
+        </div>
+        <!-- Courses List -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">My Courses</h3>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200" id="courses-table">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    scope="col"
+                  >
+                    Course Code
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    scope="col"
+                  >
+                    Course Name
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    scope="col"
+                  >
+                    Instructor
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    scope="col"
+                  >
+                    Schedule
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    scope="col"
+                  >
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200" id="courses-body">
+                <tr>
+                  <td
+                    colspan="5"
+                    class="px-6 py-4 whitespace-nowrap text-center text-gray-500"
+                  >
+                    Loading courses...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- Upcoming Events -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">Upcoming Events</h3>
+          <ul class="divide-y divide-gray-200" id="events-list">
+            <li
+              class="py-4 w-full text-center text-gray-400 italic"
+              id="events-loading"
+            >
+              Loading events...
+            </li>
+          </ul>
+        </div>
+        <!-- Messages -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">Recent Messages</h3>
+          <ul class="divide-y divide-gray-200" id="messages-list">
+            <li
+              class="py-4 w-full text-center text-gray-400 italic"
+              id="messages-loading"
+            >
+              Loading messages...
+            </li>
+          </ul>
+        </div>
+      </section>
+    </div>
+  </main>
+  <footer class="bg-white border-t border-gray-200 py-4 mt-8">
+    <div
+      class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500 text-sm"
+    >
+      © 2025 Student Dashboard. All rights reserved.
+    </div>
+  </footer>
+  <script>
+    // Firebase configuration - replace with your own config
+    const firebaseConfig = {
+     apiKey: "AIzaSyAxRNUr78-dnLfFjKdDxvpTOWJrTQUOiZA",
+     authDomain: "find-mentor-a6c2e.firebaseapp.com",
+     projectId: "find-mentor-a6c2e",
+     storageBucket: "find-mentor-a6c2e.appspot.com",
+     messagingSenderId: "628413142447",
+     appId: "1:628413142447:web:6bd6385b2ee727a8694b5a"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    // Elements
+    const userNameEl = document.getElementById("student-name");
+    const userMajorEl = document.getElementById("student-major");
+    const userIdEl = document.getElementById("student-id");
+    const userAvatarEl = document.getElementById("profile-picture");
+    const welcomeMessageEl = document.getElementById("welcome-message");
+    const gpaEl = document.getElementById("gpa");
+    const creditsEl = document.getElementById("credits");
+    const coursesEnrolledEl = document.getElementById("courses-enrolled");
+    const coursesBodyEl = document.getElementById("courses-body");
+    const eventsListEl = document.getElementById("events-list");
+    const messagesListEl = document.getElementById("messages-list");
+    const notificationCountEl = document.getElementById("notification-count");
+    const userNameHeaderEl = document.getElementById("user-name");
+    const userAvatarHeaderEl = document.getElementById("user-avatar");
+
+    // Utility: Create initials from name
+    function getInitials(name) {
+      if (!name) return "";
+      const parts = name.trim().split(" ");
+      if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+      return (
+        parts[0].charAt(0).toUpperCase() + parts[1].charAt(0).toUpperCase()
+      );
+    }
+
+    // Utility: Create status badge
+    function createStatusBadge(status) {
+      let bgColor = "bg-gray-100";
+      let textColor = "text-gray-600";
+      if (status.toLowerCase() === "enrolled") {
+        bgColor = "bg-green-100";
+        textColor = "text-green-800";
+      } else if (status.toLowerCase() === "waitlisted") {
+        bgColor = "bg-yellow-100";
+        textColor = "text-yellow-800";
+      } else if (status.toLowerCase() === "completed") {
+        bgColor = "bg-blue-100";
+        textColor = "text-blue-800";
+      } else if (status.toLowerCase() === "dropped") {
+        bgColor = "bg-red-100";
+        textColor = "text-red-800";
+      }
+      const span = document.createElement("span");
+      span.className = `px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${bgColor} ${textColor}`;
+      span.textContent = status;
+      return span;
+    }
+
+    // Fetch and render user profile
+    async function loadUserProfile(user) {
+      try {
+        const doc = await db.collection("student").doc(user.uid).get();
+        if (!doc.exists) {
+          userNameEl.textContent = user.displayName || "Unknown Student";
+          userMajorEl.textContent = "Major:";
+          userIdEl.textContent = "Student ID:";
+          welcomeMessageEl.textContent = "Welcome back!";
+          gpaEl.textContent = "";
+          creditsEl.textContent = "";
+          coursesEnrolledEl.textContent = "";
+          return;
+        }
+        const data = doc.data();
+        console.log("Student profile data:", data); // Add this line for debugging
+        const name = data.name || user.displayName || "Student";
+        // Set name in sidebar and header
+        userNameEl.textContent = name;
+        userNameHeaderEl.textContent = name;
+
+        const major = data.major || "";
+        const studentId = data.studentId || "";
+        const photoURL = data.photoURL || user.photoURL || null;
+
+        userMajorEl.textContent = major ? `Major: ${major}` : "Major:";
+        userIdEl.textContent = studentId ? `Student ID: ${studentId}` : "Student ID:";
+        welcomeMessageEl.textContent = `Welcome back, ${name.split(" ")[0]}!`;
+
+        if (photoURL) {
+          userAvatarEl.innerHTML = "";
+          const img = document.createElement("img");
+          img.src = photoURL;
+          img.alt = `Profile picture of ${name}`;
+          img.className = "rounded-full w-24 h-24 object-cover";
+          img.height = 96;
+          img.width = 96;
+          userAvatarEl.appendChild(img);
+
+          // Header avatar
+          userAvatarHeaderEl.innerHTML = "";
+          const imgHeader = document.createElement("img");
+          imgHeader.src = photoURL;
+          imgHeader.alt = `Profile picture of ${name}`;
+          imgHeader.className = "rounded-full w-8 h-8 object-cover";
+          imgHeader.height = 32;
+          imgHeader.width = 32;
+          userAvatarHeaderEl.appendChild(imgHeader);
+        } else {
+          const initials = getInitials(name);
+          userAvatarEl.textContent = initials;
+          userAvatarHeaderEl.textContent = initials;
+        }
+      } catch (error) {
+        console.error("Error loading user profile:", error);
+      }
+    }
+
+    // Fetch and render academic progress
+    async function loadAcademicProgress(user) {
+      try {
+        const doc = await db.collection("academicProgress").doc(user.uid).get();
+        if (!doc.exists) {
+          gpaEl.textContent = "";
+          creditsEl.textContent = "";
+          coursesEnrolledEl.textContent = "";
+          return;
+        }
+        const data = doc.data();
+        gpaEl.textContent = data.gpa !== undefined ? data.gpa.toFixed(2) : "";
+        creditsEl.textContent = data.creditsCompleted !== undefined ? data.creditsCompleted : "";
+        coursesEnrolledEl.textContent = data.coursesEnrolled !== undefined ? data.coursesEnrolled : "";
+      } catch (error) {
+        console.error("Error loading academic progress:", error);
+      }
+    }
+
+    // Fetch and render courses
+    async function loadCourses(user) {
+      try {
+        const coursesBody = coursesBodyEl;
+        coursesBody.innerHTML = "";
+        const snapshot = await db
+          .collection("student")
+          .doc(user.uid)
+          .collection("courses")
+          .orderBy("courseCode")
+          .get();
+        if (snapshot.empty) {
+          const tr = document.createElement("tr");
+          const td = document.createElement("td");
+          td.colSpan = 5;
+          td.className = "px-6 py-4 whitespace-nowrap text-center text-gray-500";
+          td.textContent = "No courses enrolled.";
+          tr.appendChild(td);
+          coursesBody.appendChild(tr);
+          return;
+        }
+        snapshot.forEach((doc) => {
+          const course = doc.data();
+          const tr = document.createElement("tr");
+
+          const tdCode = document.createElement("td");
+          tdCode.className = "px-6 py-4 whitespace-nowrap text-gray-700 font-medium";
+          tdCode.textContent = course.courseCode || "";
+          tr.appendChild(tdCode);
+
+          const tdName = document.createElement("td");
+          tdName.className = "px-6 py-4 whitespace-nowrap text-gray-700";
+          tdName.textContent = course.courseName || "";
+          tr.appendChild(tdName);
+
+          const tdInstructor = document.createElement("td");
+          tdInstructor.className = "px-6 py-4 whitespace-nowrap text-gray-700";
+          tdInstructor.textContent = course.instructor || "";
+          tr.appendChild(tdInstructor);
+
+          const tdSchedule = document.createElement("td");
+          tdSchedule.className = "px-6 py-4 whitespace-nowrap text-gray-700";
+          tdSchedule.textContent = course.schedule || "";
+          tr.appendChild(tdSchedule);
+
+          const tdStatus = document.createElement("td");
+          tdStatus.className = "px-6 py-4 whitespace-nowrap";
+          tdStatus.appendChild(createStatusBadge(course.status || "Unknown"));
+          tr.appendChild(tdStatus);
+
+          coursesBody.appendChild(tr);
+        });
+      } catch (error) {
+        console.error("Error loading courses:", error);
+        coursesBodyEl.innerHTML =
+          '<tr><td colspan="5" class="px-6 py-4 whitespace-nowrap text-center text-red-600">Failed to load courses.</td></tr>';
+      }
+    }
+
+    // Fetch and render upcoming events
+    async function loadEvents(user) {
+      try {
+        const eventsList = eventsListEl;
+        eventsList.innerHTML = "";
+        const snapshot = await db
+          .collection("student")
+          .doc(user.uid)
+          .collection("events")
+          .orderBy("date")
+          .get();
+        if (snapshot.empty) {
+          const li = document.createElement("li");
+          li.className = "py-4 w-full text-center text-gray-400 italic";
+          li.textContent = "No upcoming events.";
+          eventsList.appendChild(li);
+          return;
+        }
+        snapshot.forEach((doc) => {
+          const event = doc.data();
+          const li = document.createElement("li");
+          li.className = "py-4 flex items-start space-x-4";
+
+          const iconDiv = document.createElement("div");
+          iconDiv.className = "flex-shrink-0";
+
+          const iconImg = document.createElement("img");
+          iconImg.className = "w-12 h-12 rounded-full p-2";
+          iconImg.height = 48;
+          iconImg.width = 48;
+          iconImg.alt = event.iconAlt || "Event icon";
+          iconImg.src = event.iconURL || "https://placehold.co/48x48?text=E";
+
+          iconDiv.appendChild(iconImg);
+          li.appendChild(iconDiv);
+
+          const contentDiv = document.createElement("div");
+          contentDiv.className = "flex-1";
+
+          const titleP = document.createElement("p");
+          titleP.className = "text-gray-800 font-semibold";
+          titleP.textContent = event.title || "";
+
+          const dateP = document.createElement("p");
+          dateP.className = "text-gray-600 text-sm";
+          dateP.textContent = event.date
+            ? `Date: ${new Date(event.date.seconds * 1000).toLocaleString()}`
+            : "";
+
+          const locationP = document.createElement("p");
+          locationP.className = "text-gray-500 text-sm mt-1";
+          locationP.textContent = event.location || "";
+
+          contentDiv.appendChild(titleP);
+          contentDiv.appendChild(dateP);
+          if (locationP.textContent) contentDiv.appendChild(locationP);
+
+          li.appendChild(contentDiv);
+
+          eventsList.appendChild(li);
+        });
+      } catch (error) {
+        console.error("Error loading events:", error);
+        eventsListEl.innerHTML =
+          '<li class="py-4 w-full text-center text-red-600">Failed to load events.</li>';
+      }
+    }
+
+    // Fetch and render messages
+    async function loadMessages(user) {
+      try {
+        const messagesList = messagesListEl;
+        messagesList.innerHTML = "";
+        const snapshot = await db
+          .collection("student")
+          .doc(user.uid)
+          .collection("messages")
+          .orderBy("timestamp", "desc")
+          .limit(5)
+          .get();
+        if (snapshot.empty) {
+          const li = document.createElement("li");
+          li.className = "py-4 w-full text-center text-gray-400 italic";
+          li.textContent = "No messages to display.";
+          messagesList.appendChild(li);
+          notificationCountEl.textContent = "0";
+          return;
+        }
+        notificationCountEl.textContent = snapshot.size.toString();
+        snapshot.forEach((doc) => {
+          const message = doc.data();
+          const li = document.createElement("li");
+          li.className = "py-4 flex items-start space-x-4";
+
+          const avatarDiv = document.createElement("div");
+          avatarDiv.className =
+            "w-10 h-10 rounded-full object-cover bg-gray-300 text-white flex items-center justify-center font-semibold";
+          avatarDiv.style.flexShrink = "0";
+
+          if (message.senderPhotoURL) {
+            const img = document.createElement("img");
+            img.src = message.senderPhotoURL;
+            img.alt = `Profile picture of ${message.senderName || "Sender"}`;
+            img.className = "w-10 h-10 rounded-full object-cover";
+            img.height = 40;
+            img.width = 40;
+            avatarDiv.appendChild(img);
+          } else {
+            avatarDiv.textContent = getInitials(message.senderName || "");
+          }
+          li.appendChild(avatarDiv);
+
+          const contentDiv = document.createElement("div");
+          contentDiv.className = "flex-1";
+
+          const headerDiv = document.createElement("div");
+          headerDiv.className = "flex justify-between items-center";
+
+          const senderP = document.createElement("p");
+          senderP.className = "text-gray-800 font-semibold";
+          senderP.textContent = message.senderName || "Unknown";
+
+          const timeP = document.createElement("p");
+          timeP.className = "text-xs text-gray-400";
+          if (message.timestamp) {
+            const date = new Date(message.timestamp.seconds * 1000);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            let timeText = "";
+            if (diffMins < 1) timeText = "Just now";
+            else if (diffMins < 60) timeText = `${diffMins}m ago`;
+            else if (diffMins < 1440)
+              timeText = `${Math.floor(diffMins / 60)}h ago`;
+            else timeText = date.toLocaleDateString();
+            timeP.textContent = timeText;
+          } else {
+            timeP.textContent = "";
+          }
+
+          headerDiv.appendChild(senderP);
+          headerDiv.appendChild(timeP);
+
+          const messageP = document.createElement("p");
+          messageP.className = "text-gray-600 text-sm mt-1";
+          messageP.textContent = message.text || "";
+
+          contentDiv.appendChild(headerDiv);
+          contentDiv.appendChild(messageP);
+
+          li.appendChild(contentDiv);
+
+          messagesList.appendChild(li);
+        });
+      } catch (error) {
+        console.error("Error loading messages:", error);
+        messagesListEl.innerHTML =
+          '<li class="py-4 w-full text-center text-red-600">Failed to load messages.</li>';
+        notificationCountEl.textContent = "0";
+      }
+    }
+
+    // Initialize all data loading after authentication
+    async function initializeDashboard(user) {
+      await loadUserProfile(user);
+      await loadAcademicProgress(user);
+      await loadCourses(user);
+      await loadEvents(user);
+      await loadMessages(user);
+    }
+
+    // Mobile menu toggle
+    const mobileMenuButton = document.getElementById("mobile-menu-button");
+    const mobileMenu = document.getElementById("mobile-menu");
+    mobileMenuButton.addEventListener("click", () => {
+      mobileMenu.classList.toggle("hidden");
+    });
+
+    // Run on page load and after authentication
+    window.addEventListener("DOMContentLoaded", () => {
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          initializeDashboard(user);
+        } else {
+          // Optionally redirect to login page or show a message
+          userNameEl.textContent = "Not signed in";
+          welcomeMessageEl.textContent = "Please sign in to view your dashboard.";
+        }
+      });
+    });
+  </script>
+</body>
+</html>

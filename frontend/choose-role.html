@@ -1,0 +1,59 @@
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <title>
+   Find Mentor - Choose Role
+  </title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <style>
+   body {
+      font-family: 'Inter', sans-serif;
+    }
+    .role-card:focus {
+      outline: 2px solid #6366f1;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 3px #a7f3d0;
+    }
+    .role-card {
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .role-card:hover {
+      transform: translateY(-4px) scale(1.03);
+      box-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.15), 0 1.5px 6px 0 rgba(59, 130, 246, 0.10);
+    }
+  </style>
+ </head>
+ <body class="min-h-screen bg-gradient-to-tr from-gray-800 to-gray-900 flex items-center justify-center px-4">
+  <div class="max-w-lg w-full bg-white rounded-3xl shadow-lg p-8 text-center">
+   <h1 class="text-4xl font-bold text-gray-900 mb-8 tracking-tight">
+    Choose Your Role
+   </h1>
+   <p class="text-gray-600 mb-10 text-base">
+    Please select whether you want to log in or sign up as a Mentor or a Student.
+   </p>
+   <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+    <a href="mentor_login.html" class="role-card block bg-gradient-to-br from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white rounded-xl shadow-md p-8 transition flex flex-col items-center justify-center focus:outline-none" tabindex="0" aria-label="Mentor login or signup">
+     <i class="fas fa-chalkboard-teacher fa-4x mb-4 drop-shadow-lg"></i>
+     <span class="text-xl font-semibold mb-1">
+      Mentor
+     </span>
+     <span class="text-sm font-medium opacity-80">Teach &amp; guide students</span>
+    </a>
+    <a href="login.html" class="role-card block bg-gradient-to-br from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl shadow-md p-8 transition flex flex-col items-center justify-center focus:outline-none" tabindex="0" aria-label="Student login or signup">
+     <i class="fas fa-user-graduate fa-4x mb-4 drop-shadow-lg"></i>
+     <span class="text-xl font-semibold mb-1">
+      Student
+     </span>
+     <span class="text-sm font-medium opacity-80">Learn &amp; connect</span>
+    </a>
+   </div>
+   <p class="mt-10 text-gray-400 text-xs select-none">
+    © 2025 Find Mentor. All rights reserved.
+   </p>
+  </div>
+ </body>
+</html>

@@ -1,0 +1,182 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <title>Mentor Signup</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    ::selection { background: #99f6e4; }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-tr from-green-500 to-teal-500 flex items-center justify-center px-4">
+  <div class="max-w-md w-full bg-white rounded-3xl shadow-lg p-8">
+    <div class="flex justify-center mb-6">
+      <img alt="Find Mentor logo" class="w-20 h-20 drop-shadow-lg rounded-full border-4 border-green-100" height="80" src="assets/logo.jpg" width="80"/>
+    </div>
+    <h1 class="text-3xl font-semibold text-center text-gray-800 mb-2 tracking-tight">
+      Mentor Signup
+    </h1>
+    <p class="text-center text-gray-500 mb-8">
+      Create your Find Mentor mentor account
+    </p>
+    <form class="space-y-4" id="mentor-signup-form" autocomplete="off">
+      <div>
+        <label for="full-name" class="block text-gray-700 font-medium mb-2">Full Name <span class="text-red-500">*</span></label>
+        <input autocomplete="name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition placeholder-gray-400" id="full-name" name="fullName" placeholder="John Doe" required type="text"/>
+      </div>
+      <div>
+        <label for="email" class="block text-gray-700 font-medium mb-2">Email Address <span class="text-red-500">*</span></label>
+        <input autocomplete="email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition placeholder-gray-400" id="email" name="email" placeholder="john@example.com" required type="email"/>
+      </div>
+      <div>
+        <label for="phone" class="block text-gray-700 font-medium mb-2">Phone Number <span class="text-red-500">*</span></label>
+        <input autocomplete="tel" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition placeholder-gray-400" id="phone" name="phone" placeholder="+1 234 567 8901" required type="tel"/>
+      </div>
+      <div>
+        <label for="expertise" class="block text-gray-700 font-medium mb-2">Areas of Expertise <span class="text-red-500">*</span></label>
+        <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition" id="expertise" name="expertise" required>
+          <option disabled selected value="">Select your expertise</option>
+          <option value="software-development">Software Development</option>
+          <option value="data-science">Data Science</option>
+          <option value="product-management">Product Management</option>
+          <option value="design">Design</option>
+          <option value="marketing">Marketing</option>
+          <option value="business-strategy">Business Strategy</option>
+          <option value="others">Others</option>
+        </select>
+      </div>
+      <div id="expertise-other-container" class="hidden" aria-live="polite">
+        <label for="expertise-other" class="block text-gray-700 font-medium mb-2">Please specify your expertise <span class="text-red-500">*</span></label>
+        <input class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition placeholder-gray-400" id="expertise-other" name="expertiseOther" placeholder="Enter your expertise" type="text"/>
+        <p class="mt-1 text-sm text-red-600 hidden" id="expertise-other-error" role="alert">Please specify your expertise.</p>
+      </div>
+      <div>
+        <label for="linkedin" class="block text-gray-700 font-medium mb-2">LinkedIn Profile URL</label>
+        <input autocomplete="url" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition placeholder-gray-400" id="linkedin" name="linkedin" placeholder="https://linkedin.com/in/yourprofile" type="url"/>
+      </div>
+      <button class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg shadow-md transition flex items-center justify-center gap-2" type="submit">
+        <i class="fas fa-user-plus mr-2"></i>
+        <span>Sign Up as Mentor</span>
+      </button>
+    </form>
+    <p class="mt-6 text-center text-gray-600">
+      Already have an account?
+      <a href="mentor_login.html" class="text-green-600 font-semibold hover:text-green-800 underline focus:outline-none focus:ring-2 focus:ring-green-400">Login here</a>
+    </p>
+  </div>
+  <script>
+    const captchaImage = document.getElementById('captcha-image');
+    const refreshBtn = document.getElementById('refresh-captcha');
+    const captchaInput = document.getElementById('captcha-input');
+    const captchaError = document.getElementById('captcha-error');
+    const form = document.getElementById('mentor-signup-form');
+    const expertiseSelect = document.getElementById('expertise');
+    const expertiseOtherContainer = document.getElementById('expertise-other-container');
+    const expertiseOtherInput = document.getElementById('expertise-other');
+    const expertiseOtherError = document.getElementById('expertise-other-error');
+
+    function generateCaptchaText() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let text = '';
+      for (let i = 0; i < 5; i++) {
+        text += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return text;
+    }
+
+    let currentCaptcha = '';
+
+    function updateCaptcha() {
+      currentCaptcha = generateCaptchaText();
+      const url = `https://placehold.co/300x100/png?text=${encodeURIComponent(
+        currentCaptcha
+      )}&font=roboto&font-size=48&text-color=000000&bg-color=eeeeee`;
+      captchaImage.src = url;
+      captchaInput.value = '';
+      captchaError.classList.add('hidden');
+      captchaError.classList.remove('show');
+    }
+
+    refreshBtn.addEventListener('click', () => {
+      updateCaptcha();
+      captchaInput.focus();
+    });
+
+    expertiseSelect.addEventListener('change', () => {
+      if (expertiseSelect.value === 'others') {
+        expertiseOtherContainer.classList.remove('hidden');
+        expertiseOtherContainer.classList.add('show');
+        expertiseOtherInput.setAttribute('required', 'required');
+        expertiseOtherInput.focus();
+      } else {
+        expertiseOtherContainer.classList.add('hidden');
+        expertiseOtherContainer.classList.remove('show');
+        expertiseOtherInput.removeAttribute('required');
+        expertiseOtherInput.value = '';
+        expertiseOtherError.classList.add('hidden');
+        expertiseOtherError.classList.remove('show');
+      }
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      captchaError.classList.add('hidden');
+      captchaError.classList.remove('show');
+      expertiseOtherError.classList.add('hidden');
+      expertiseOtherError.classList.remove('show');
+
+      if (captchaInput.value.trim().toUpperCase() !== currentCaptcha) {
+        captchaError.classList.remove('hidden');
+        captchaError.classList.add('show');
+        captchaInput.focus();
+        return;
+      }
+
+      // Simple validation for required fields
+      const fullName = form.fullName.value.trim();
+      const email = form.email.value.trim();
+      const phone = form.phone.value.trim();
+      const expertise = expertiseSelect.value;
+      const expertiseOther = expertiseOtherInput.value.trim();
+
+      if (!fullName || !email || !phone || !expertise) {
+        window.alert('Please fill in all required fields.');
+        return;
+      }
+
+      if (expertise === 'others' && !expertiseOther) {
+        expertiseOtherError.classList.remove('hidden');
+        expertiseOtherError.classList.add('show');
+        expertiseOtherInput.focus();
+        return;
+      }
+
+      // Here you would normally send data to server
+      let expertiseDisplay = expertise === 'others' ? expertiseOther : expertiseSelect.options[expertiseSelect.selectedIndex].text;
+
+      window.alert(
+        `🎉 Mentor signup successful! Thank you, ${fullName}.\n\nExpertise: ${expertiseDisplay}`
+      );
+
+      form.reset();
+      expertiseOtherContainer.classList.add('hidden');
+      expertiseOtherContainer.classList.remove('show');
+      expertiseOtherInput.removeAttribute('required');
+      updateCaptcha();
+    });
+
+    // Allow pressing Enter on refresh button for accessibility
+    refreshBtn.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        refreshBtn.click();
+      }
+    });
+
+    updateCaptcha();
+  </script>
+</body>
+</html>

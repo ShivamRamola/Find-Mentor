@@ -1,0 +1,500 @@
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <title>
+   Find Mentor - My Mentees
+  </title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;display=swap" rel="stylesheet"/>
+  <style>
+   body {
+      font-family: "Inter", sans-serif;
+    }
+  </style>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js">
+  </script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js">
+  </script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js">
+  </script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js">
+  </script>
+ </head>
+ <body class="bg-gray-100 min-h-screen flex flex-col">
+  <!-- Header -->
+  <header class="bg-white shadow-md sticky top-0 z-30">
+   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+    <div class="flex items-center space-x-3">
+     <img alt="Find Mentor logo with letters FM in white on purple background" class="h-10 w-10 rounded" height="40" src="assets/logo.jpg" width="40"/>
+     <h1 class="text-2xl font-semibold text-indigo-600">
+      Find Mentor
+     </h1>
+    </div>
+    <nav class="hidden md:flex space-x-6 text-gray-700 font-medium">
+     <a class="hover:text-indigo-600 transition" href="mentor_dashboard.html">
+      Dashboard
+     </a>
+     <a class="hover:text-indigo-600 transition" href="my_mentees.html">
+      My Mentees
+     </a>
+     <a class="hover:text-indigo-600 transition" href="mentor_session.html">
+      Sessions
+     </a>
+     <a aria-current="page" class="hover:text-indigo-600 transition text-indigo-600 font-semibold" href="my_mentees.html">
+      Messages
+     </a>
+     <a class="hover:text-indigo-600 transition" href="settings.html">
+      Settings
+     </a>
+    </nav>
+    <div class="flex items-center space-x-4">
+     <button aria-label="Notifications" class="relative text-gray-600 hover:text-indigo-600 transition focus:outline-none" id="notification-button">
+      <i class="fas fa-bell fa-lg">
+      </i>
+      <span class="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full px-1.5" id="notification-count">
+       0
+      </span>
+     </button>
+     <button aria-expanded="false" aria-haspopup="true" class="flex items-center space-x-2 focus:outline-none" id="user-menu-button">
+      <img alt="User avatar" class="h-10 w-10 rounded-full bg-gray-400 flex items-center justify-center text-white font-bold text-lg object-cover" height="40" id="user-avatar" src="https://storage.googleapis.com/a1aa/image/fda119d0-6bf8-476c-2be5-982421f5be7e.jpg" width="40"/>
+      <span class="hidden sm:block font-semibold text-gray-700" id="user-name">
+       Loading...
+      </span>
+      <i class="fas fa-chevron-down text-gray-500">
+      </i>
+     </button>
+    </div>
+   </div>
+  </header>
+  <main class="flex-1 max-w-7xl mx-auto p-6 bg-white rounded-lg shadow-md my-8 flex flex-col md:flex-row md:space-x-6">
+   <!-- Mentees List -->
+   <section class="md:w-1/3 border-r border-gray-200 pr-4">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-2xl font-semibold text-gray-800">
+        Mentees
+      </h2>
+      <button id="add-mentee-btn" class="bg-indigo-600 text-white px-3 py-1 rounded-md font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+        <i class="fas fa-user-plus mr-1"></i>Add a Mentee
+      </button>
+    </div>
+    <ul class="divide-y divide-gray-200 max-h-[70vh] overflow-y-auto" id="mentees-list">
+     <li class="text-center text-gray-500 py-12" id="mentees-loading">
+      Loading mentees...
+     </li>
+    </ul>
+
+    <!-- Modal for selecting online students -->
+    <div id="online-students-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+      <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <h3 class="text-lg font-semibold mb-4">Select an online student</h3>
+        <ul id="online-students-list" class="divide-y divide-gray-200 max-h-60 overflow-y-auto mb-4"></ul>
+        <button id="close-modal-btn" class="mt-2 px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
+      </div>
+    </div>
+   </section>
+   <!-- Chat Section -->
+   <section class="flex-1 flex flex-col h-[70vh]">
+    <div class="flex items-center border-b border-gray-200 pb-4 mb-4">
+     <img alt="Selected mentee avatar" class="h-12 w-12 rounded-full object-cover mr-4" height="48" id="chat-mentee-avatar" src="https://storage.googleapis.com/a1aa/image/a6bba93e-e839-4812-68d4-713d63817939.jpg" width="48"/>
+     <h3 class="text-xl font-semibold text-gray-800" id="chat-mentee-name">
+      Select a mentee to start chatting
+     </h3>
+    </div>
+    <div aria-live="polite" aria-relevant="additions" class="flex-1 overflow-y-auto border border-gray-300 rounded-md p-4 bg-gray-50" id="chat-messages" tabindex="0">
+     <p class="text-center text-gray-500 mt-20">
+      No conversation selected.
+     </p>
+    </div>
+    <form class="mt-4 flex space-x-2" id="chat-form">
+     <input aria-label="Type your message" class="flex-1 border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" id="chat-input" placeholder="Type a message..." type="text"/>
+     <label class="relative cursor-pointer text-indigo-600 hover:text-indigo-800 flex items-center justify-center px-3 py-2 border border-indigo-600 rounded-md hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500" for="file-input" title="Send file (PDF, PPT, etc.)">
+      <i class="fas fa-paperclip fa-lg">
+      </i>
+      <input accept=".pdf,.ppt,.pptx,.doc,.docx,.txt,.png,.jpg,.jpeg,.gif" class="hidden" id="file-input" type="file"/>
+     </label>
+     <input aria-label="Send message" class="bg-indigo-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer" id="send-btn" type="submit" value="Send"/>
+    </form>
+    <div class="mt-2">
+     <input aria-label="Send link" class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" id="link-input" placeholder="Paste a YouTube/tutorial link and press Enter" type="url"/>
+    </div>
+   </section>
+  </main>
+  <script>
+   // Firebase config - replace with your own config
+    const firebaseConfig = {
+     apiKey: "AIzaSyAxRNUr78-dnLfFjKdDxvpTOWJrTQUOiZA",
+     authDomain: "find-mentor-a6c2e.firebaseapp.com",
+     projectId: "find-mentor-a6c2e",
+     storageBucket: "find-mentor-a6c2e.firebasestorage.app",
+     messagingSenderId: "628413142447",
+     appId: "1:628413142447:web:6bd6385b2ee727a8694b5a"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+
+    // Elements
+    const userNameEl = document.getElementById("user-name");
+    const userAvatarEl = document.getElementById("user-avatar");
+    const notificationCountEl = document.getElementById("notification-count");
+
+    const menteesList = document.getElementById("mentees-list");
+    const menteesLoading = document.getElementById("mentees-loading");
+
+    const chatMenteeAvatar = document.getElementById("chat-mentee-avatar");
+    const chatMenteeName = document.getElementById("chat-mentee-name");
+    const chatMessages = document.getElementById("chat-messages");
+    const chatForm = document.getElementById("chat-form");
+    const chatInput = document.getElementById("chat-input");
+    const fileInput = document.getElementById("file-input");
+    const sendBtn = document.getElementById("send-btn");
+    const linkInput = document.getElementById("link-input");
+
+    let currentUser = null;
+    let mentees = [];
+    let selectedMentee = null;
+    let unsubscribeMessages = null;
+
+    // Helper: format timestamp to readable string
+    function formatTimestamp(timestamp) {
+      if (!timestamp) return "";
+      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+      return date.toLocaleString(undefined, {
+        dateStyle: "short",
+        timeStyle: "short",
+      });
+    }
+
+    // Render mentees list
+    function renderMentees() {
+      menteesList.innerHTML = "";
+      if (mentees.length === 0) {
+        const li = document.createElement("li");
+        li.className = "text-center text-gray-500 py-12";
+        li.textContent = "No mentees assigned.";
+        menteesList.appendChild(li);
+        return;
+      }
+      mentees.forEach((mentee) => {
+        const li = document.createElement("li");
+        li.className = "flex items-center space-x-3 p-3 rounded-md cursor-pointer hover:bg-indigo-50";
+        li.tabIndex = 0;
+
+        const avatar = document.createElement("img");
+        avatar.className = "h-10 w-10 rounded-full object-cover";
+        avatar.alt = mentee.name ? `Avatar of mentee ${mentee.name}` : "Mentee avatar";
+        avatar.src = mentee.photoURL || `https://placehold.co/40x40/png?text=${(mentee.name || "M").split(" ").map(n => n[0]).join("").toUpperCase()}`;
+        avatar.width = 40;
+        avatar.height = 40;
+
+        const nameDiv = document.createElement("div");
+        nameDiv.className = "text-gray-900 font-medium";
+        nameDiv.textContent = mentee.name || "Unnamed";
+
+        li.appendChild(avatar);
+        li.appendChild(nameDiv);
+
+        li.addEventListener("click", () => {
+          selectMentee(mentee);
+        });
+        li.addEventListener("keypress", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            selectMentee(mentee);
+          }
+        });
+
+        menteesList.appendChild(li);
+      });
+    }
+
+    // Select mentee to chat
+    function selectMentee(mentee) {
+      if (unsubscribeMessages) {
+        unsubscribeMessages();
+        unsubscribeMessages = null;
+      }
+      selectedMentee = mentee;
+      chatMenteeName.textContent = mentee.name || "Unnamed";
+      chatMenteeAvatar.src = mentee.photoURL || `https://placehold.co/48x48/png?text=${(mentee.name || "M").split(" ").map(n => n[0]).join("").toUpperCase()}`;
+      chatMenteeAvatar.alt = `${mentee.name || "Mentee"} avatar`;
+      chatMessages.innerHTML = '<p class="text-center text-gray-500 mt-20">Loading messages...</p>';
+      chatInput.disabled = false;
+      sendBtn.disabled = false;
+      fileInput.disabled = false;
+      linkInput.disabled = false;
+      loadMessages();
+    }
+
+    // Load messages for selected mentee
+    function loadMessages() {
+      if (!currentUser || !selectedMentee) {
+        chatMessages.innerHTML = '<p class="text-center text-gray-500 mt-20">Select a mentee to start chatting.</p>';
+        chatInput.disabled = true;
+        sendBtn.disabled = true;
+        fileInput.disabled = true;
+        linkInput.disabled = true;
+        return;
+      }
+      const chatId = getChatId(currentUser.uid, selectedMentee.id);
+      unsubscribeMessages = db.collection("chats").doc(chatId).collection("messages").orderBy("createdAt")
+        .onSnapshot((snapshot) => {
+          chatMessages.innerHTML = "";
+          if (snapshot.empty) {
+            chatMessages.innerHTML = '<p class="text-center text-gray-500 mt-20">No messages yet. Start the conversation!</p>';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return;
+          }
+          snapshot.forEach((doc) => {
+            const msg = doc.data();
+            const isMentor = msg.senderId === currentUser.uid;
+            const msgDiv = document.createElement("div");
+            msgDiv.className = `max-w-xs md:max-w-md mb-3 p-3 rounded-lg break-words ${isMentor ? "bg-indigo-600 text-white self-end" : "bg-gray-200 text-gray-900 self-start"}`;
+            msgDiv.style.wordBreak = "break-word";
+
+            // Message content
+            if (msg.type === "text") {
+              msgDiv.textContent = msg.text;
+            } else if (msg.type === "file") {
+              const link = document.createElement("a");
+              link.href = msg.fileURL;
+              link.target = "_blank";
+              link.rel = "noopener noreferrer";
+              link.className = "underline hover:text-indigo-300";
+              link.textContent = msg.fileName || "File";
+              msgDiv.appendChild(link);
+            } else if (msg.type === "link") {
+              const link = document.createElement("a");
+              link.href = msg.link;
+              link.target = "_blank";
+              link.rel = "noopener noreferrer";
+              link.className = "underline hover:text-indigo-300";
+              link.textContent = msg.link;
+              msgDiv.appendChild(link);
+            }
+
+            // Timestamp
+            const timeSpan = document.createElement("div");
+            timeSpan.className = "text-xs text-gray-300 mt-1 text-right";
+            timeSpan.textContent = formatTimestamp(msg.createdAt);
+            msgDiv.appendChild(timeSpan);
+
+            chatMessages.appendChild(msgDiv);
+          });
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }, (error) => {
+          chatMessages.innerHTML = `<p class="text-center text-red-600 mt-20">Failed to load messages: ${error.message}</p>`;
+        });
+    }
+
+    // Generate consistent chat ID for mentor-mentee pair
+    function getChatId(uid1, uid2) {
+      return uid1 < uid2 ? uid1 + "_" + uid2 : uid2 + "_" + uid1;
+    }
+
+    // Send message (text, file, or link)
+    async function sendMessage({ text = null, file = null, link = null }) {
+      if (!currentUser || !selectedMentee) return;
+      const chatId = getChatId(currentUser.uid, selectedMentee.id);
+      const messagesRef = db.collection("chats").doc(chatId).collection("messages");
+
+      let messageData = {
+        senderId: currentUser.uid,
+        recipientId: selectedMentee.id,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      };
+
+      if (text) {
+        messageData.type = "text";
+        messageData.text = text.trim();
+      } else if (file) {
+        messageData.type = "file";
+        // Upload file to Firebase Storage
+        const storageRef = storage.ref();
+        const fileRef = storageRef.child(`chat_files/${chatId}/${Date.now()}_${file.name}`);
+        try {
+          const snapshot = await fileRef.put(file);
+          const fileURL = await snapshot.ref.getDownloadURL();
+          messageData.fileURL = fileURL;
+          messageData.fileName = file.name;
+        } catch (error) {
+          alert("Failed to upload file: " + error.message);
+          return;
+        }
+      } else if (link) {
+        messageData.type = "link";
+        messageData.link = link.trim();
+      } else {
+        return;
+      }
+
+      try {
+        await messagesRef.add(messageData);
+        chatInput.value = "";
+        linkInput.value = "";
+        fileInput.value = "";
+      } catch (error) {
+        alert("Failed to send message: " + error.message);
+      }
+    }
+
+    // Add a mentee button logic (show online students modal)
+    const addMenteeBtn = document.getElementById("add-mentee-btn");
+    const onlineStudentsModal = document.getElementById("online-students-modal");
+    const onlineStudentsList = document.getElementById("online-students-list");
+    const closeModalBtn = document.getElementById("close-modal-btn");
+
+    if (addMenteeBtn) {
+      addMenteeBtn.addEventListener("click", async () => {
+        if (!currentUser) {
+          alert("Please log in as a mentor to add a mentee.");
+          return;
+        }
+        // Show modal
+        onlineStudentsModal.classList.remove("hidden");
+        onlineStudentsList.innerHTML = "<li class='text-center text-gray-500 py-4'>Loading...</li>";
+        // Query Firestore for online students
+        try {
+          const snapshot = await db.collection("users")
+            .where("role", "==", "student")
+            .where("online", "==", true)
+            .get();
+          onlineStudentsList.innerHTML = "";
+          if (snapshot.empty) {
+            onlineStudentsList.innerHTML = "<li class='text-center text-gray-500 py-4'>No students online.</li>";
+            return;
+          }
+          snapshot.forEach(doc => {
+            const student = doc.data();
+            const li = document.createElement("li");
+            li.className = "flex items-center space-x-3 p-2 rounded-md cursor-pointer hover:bg-indigo-50";
+            li.tabIndex = 0;
+            const avatar = document.createElement("img");
+            avatar.className = "h-8 w-8 rounded-full object-cover";
+            avatar.src = student.photoURL || `https://placehold.co/32x32/png?text=${(student.name || "S").split(" ").map(n => n[0]).join("").toUpperCase()}`;
+            avatar.alt = student.name || "Student";
+            avatar.width = 32;
+            avatar.height = 32;
+            const nameDiv = document.createElement("div");
+            nameDiv.className = "text-gray-900 font-medium";
+            nameDiv.textContent = student.name || "Unnamed";
+            li.appendChild(avatar);
+            li.appendChild(nameDiv);
+            li.addEventListener("click", async () => {
+              // Add as mentee
+              try {
+                await db.collection("mentees").add({
+                  name: student.name || "Unnamed",
+                  mentorId: currentUser.uid,
+                  studentId: doc.id,
+                  photoURL: student.photoURL || "",
+                  createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                alert("Mentee added successfully!");
+                loadMenteesForChat(currentUser.uid);
+              } catch (error) {
+                alert("Failed to add mentee: " + error.message);
+              }
+              onlineStudentsModal.classList.add("hidden");
+            });
+            onlineStudentsList.appendChild(li);
+          });
+        } catch (error) {
+          onlineStudentsList.innerHTML = "<li class='text-center text-red-600 py-4'>Failed to load students.</li>";
+        }
+      });
+    }
+    if (closeModalBtn) {
+      closeModalBtn.addEventListener("click", () => {
+        onlineStudentsModal.classList.add("hidden");
+      });
+    }
+
+   // Event listeners
+    chatForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = chatInput.value.trim();
+      if (text) {
+        sendMessage({ text });
+      }
+    });
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files[0];
+      if (file) {
+        sendMessage({ file });
+      }
+    });
+
+    linkInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const link = linkInput.value.trim();
+        if (link) {
+          sendMessage({ link });
+        }
+      }
+    });
+
+    // Auth state listener
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        currentUser = user;
+        userNameEl.textContent = user.displayName || "Mentor";
+        if (user.photoURL) {
+          userAvatarEl.src = user.photoURL;
+          userAvatarEl.alt = `${user.displayName || "Mentor"} avatar`;
+        } else {
+          const initials = (user.displayName || "M").split(" ").map(n => n[0]).join("").toUpperCase();
+          userAvatarEl.src = `https://placehold.co/40x40/png?text=${initials}`;
+          userAvatarEl.alt = `${user.displayName || "Mentor"} avatar placeholder`;
+        }
+        loadMenteesForChat(user.uid);
+      } else {
+        currentUser = null;
+        userNameEl.textContent = "Guest";
+        menteesList.innerHTML = '<li class="text-center text-gray-500 py-12">Please log in to view messages.</li>';
+        chatMessages.innerHTML = '<p class="text-center text-gray-500 mt-20">No conversation selected.</p>';
+        chatInput.disabled = true;
+        sendBtn.disabled = true;
+        fileInput.disabled = true;
+        linkInput.disabled = true;
+      }
+    });
+
+    // Load mentees for chat list
+    function loadMenteesForChat(uid) {
+      menteesList.innerHTML = '<li class="text-center text-gray-500 py-12">Loading mentees...</li>';
+      db.collection("mentees")
+        .where("mentorId", "==", uid)
+        .get()
+        .then((querySnapshot) => {
+          mentees = [];
+          menteesList.innerHTML = "";
+          if (querySnapshot.empty) {
+            const li = document.createElement("li");
+            li.className = "text-center text-gray-500 py-12";
+            li.textContent = "No mentees assigned.";
+            menteesList.appendChild(li);
+            return;
+          }
+          querySnapshot.forEach((doc) => {
+            const mentee = { id: doc.id, ...doc.data() };
+            mentees.push(mentee);
+          });
+          renderMentees();
+        })
+        .catch(() => {
+          menteesList.innerHTML = '<li class="text-center text-red-600 py-12">Failed to load mentees.</li>';
+        });
+    }
+  </script>
+ </body>
+</html>

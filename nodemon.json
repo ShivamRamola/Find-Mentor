@@ -1,0 +1,15 @@
+{
+  "ignore": [
+    "node_modules/",
+    "*.log",
+    "package-lock.json",
+    "package.json",
+    "public/",
+    "dist/",
+    ".git/",
+    "*.md"
+  ],
+  "watch": [
+    "server.js"
+  ]
+}
